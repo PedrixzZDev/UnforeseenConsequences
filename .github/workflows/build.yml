@@ -18,7 +18,7 @@ jobs:
     - name: Set up JDK 21
       uses: actions/setup-java@v4
       with:
-        java-version: '17' # Define a versão do Java para 17 (compatível com Minecraft 1.19.4+ e seu gradle.properties)
+        java-version: '21' # Define a versão do Java para 17 (compatível com Minecraft 1.19.4+ e seu gradle.properties)
         distribution: 'temurin' # Escolha uma distribuição JDK
 
     - name: Grant execute permission for gradlew
