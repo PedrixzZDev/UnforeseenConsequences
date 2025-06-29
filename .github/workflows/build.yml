@@ -1,0 +1,72 @@
+# Nome do workflow, aparecerá na aba "Actions" do GitHub.
+name: Build Project
+
+# Gatilhos: Este workflow será executado em qualquer 'push' para qualquer branch,
+# e também em qualquer 'pull request' para a branch 'main'.
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+
+jobs:
+  build:
+    # O trabalho será executado em uma máquina virtual com a versão mais recente do Ubuntu.
+    runs-on: ubuntu-latest
+
+    steps:
+      # 1. Extrai o nome da branch atual de forma limpa
+      #    Isso remove 'refs/heads/' e substitui '/' por '-' para criar um nome seguro para usar em arquivos.
+      #    Ex: 'feature/new-stuff' se torna 'feature-new-stuff'.
+      - name: Extract current branch name
+        shell: bash
+        run: echo "branch_name=${GITHUB_REF#refs/heads/}" >> $GITHUB_ENV
+        id: extract_branch
+
+      # 2. Faz o checkout do código do repositório
+      #    Baixa o código-fonte para a máquina virtual.
+      - name: Checkout sources
+        uses: actions/checkout@v4
+
+      # 3. Valida o Gradle Wrapper
+      #    Uma etapa de segurança que verifica se o checksum do gradle-wrapper.jar corresponde ao oficial do Gradle.
+      - name: Validate Gradle Wrapper
+        uses: gradle/actions/wrapper-validation@v3
+
+      # 4. Configura o ambiente Java (JDK)
+      #    Seu projeto requer Java 21, conforme definido em build.gradle e mixins.json.
+      - name: Setup Java 21
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: '21'
+
+      # 5. Configura o Gradle com cache
+      #    Utiliza a ação oficial do Gradle que lida com o cache de dependências automaticamente,
+      #    acelerando builds futuros.
+      - name: Setup Gradle
+        uses: gradle/actions/setup-gradle@v4
+        with:
+          # Permite que o cache seja escrito em pushes para a branch 'main'.
+          # Para outras branches e PRs, o cache será apenas de leitura.
+          cache-read-only: ${{ github.ref != 'refs/heads/main' }}
+
+      # 6. Torna o Gradle Wrapper executável (boa prática em ambientes Linux)
+      - name: Make gradlew executable
+        run: chmod +x ./gradlew
+
+      # 7. Executa o build do Gradle
+      #    Este comando compila o mod e gera os arquivos .jar.
+      - name: Execute Gradle build
+        run: ./gradlew build
+
+      # 8. Faz o upload dos artefatos de build
+      #    Pega os JARs gerados e os disponibiliza para download na página de resumo da ação.
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          # Nome dinâmico para o artefato, usando o nome da branch.
+          # Ex: UnforeseenConsequences-Artifacts-main
+          name: UnforeseenConsequences-Artifacts-${{ env.branch_name }}
+          # Caminho correto para os JARs gerados pelo Fabric Loom.
+          path: build/libs/*.jar
