@@ -1,37 +1,34 @@
 package org.featherwhisker.rendereng.mixins;
 
 import net.minecraft.client.gl.ShaderProgram;
-import org.jetbrains.annotations.NotNull;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
-import org.spongepowered.asm.mixin.injection.Redirect;
-import java.util.List;
+import org.spongepowered.asm.mixin.injection.ModifyVariable;
 
-// Importação corrigida: A função agora vem da biblioteca LWJGL diretamente.
-import static org.lwjgl.opengl.GL20.glShaderSource;
 import static org.featherwhisker.rendereng.main.convertShader;
 import static org.featherwhisker.rendereng.main.shouldConvertShaders;
 
 @Mixin(ShaderProgram.class)
 public class ShaderProgramMixin {
 
-    // A classe alvo do redirect está correta, mas a forma de chamar o método precisa mudar.
-    // O Redirect ainda é necessário para interceptar o código, mas a chamada dentro dele será para a classe certa.
-    @Redirect(
-            method = "loadShader(Lnet/minecraft/client/gl/Shader;Ljava/lang/String;Ljava/io/InputStream;Ljava/lang/String;)V",
-            at = @At(
-                    value = "INVOKE",
-                    target = "Lcom/mojang/blaze3d/systems/RenderSystem;glShaderSource(ILjava/util/List;)V"
-            )
+    /**
+     * Esta é uma abordagem muito mais robusta. Em vez de redirecionar uma chamada de função,
+     * nós interceptamos a variável que contém o código do shader logo depois que ela é lida do arquivo.
+     * Isso nos permite modificar o código do shader antes que ele seja compilado,
+     * independentemente de como o jogo decide chamar as funções OpenGL.
+     */
+    @ModifyVariable(
+            // O método que carrega os shaders
+            method = "loadShader(Lnet/minecraft/client/gl/Shader$Type;Ljava/lang/String;Ljava/io/InputStream;Ljava/lang/String;)I",
+            // Intercepta a primeira variável String (ordinal = 0) logo após ser armazenada (STORE)
+            at = @At(value = "STORE"),
+            ordinal = 0
     )
-    private void redirectGlShaderSource(int shader, @NotNull List<String> strings) {
+    private static String modifyShaderSource(String originalShaderCode) {
         if (shouldConvertShaders) {
-            for (int i = 0; i < strings.size(); i++) {
-                var originalShader = strings.get(i);
-                strings.set(i, convertShader(originalShader, i));
-            }
+            // A nossa função de conversão recebe o código completo do shader
+            return convertShader(originalShaderCode, 0);
         }
-        // Chamada corrigida: Usando o método estático importado de org.lwjgl.opengl.GL20
-        glShaderSource(shader, strings);
+        return originalShaderCode;
     }
 }
