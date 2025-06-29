@@ -1,33 +1,38 @@
 package org.featherwhisker.rendereng.mixins;
 
-import net.minecraft.client.gl.ShaderStage;
-
+import net.minecraft.client.gl.ShaderProgram;
 import org.jetbrains.annotations.NotNull;
-
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Redirect;
 
-import static com.mojang.blaze3d.platform.GlStateManager.glShaderSource;
-import static org.featherwhisker.rendereng.main.*;
+import java.util.List;
 
-@Mixin(ShaderStage.class)
-public class ShaderStageMixin {
-	@Redirect(
-			method="load",
-			at=@At(
-					value="INVOKE",
-					target="com/mojang/blaze3d/platform/GlStateManager.glShaderSource (ILjava/util/List;)V"
-			)
-	)
-	private static void glShaderSourceIntercept(int i,@NotNull java. util. List<String> strings) {
-		if (shouldConvertShaders) {
-			for (int i1 = 0; i1 < strings.size(); i1++) {
-				var a = strings.get(i1);
-				strings.set(i1,convertShader(a,i1));
-			}
-			//log.info(strings.toString());
-		}
-		glShaderSource(i,strings);
-	}
+import static com.mojang.blaze3d.systems.RenderSystem.glShaderSource;
+import static org.featherwhisker.rendereng.main.convertShader;
+import static org.featherwhisker.rendereng.main.shouldConvertShaders;
+
+// A classe alvo mudou de ShaderStage para ShaderProgram
+@Mixin(ShaderProgram.class)
+public class ShaderProgramMixin {
+
+    // A chamada para glShaderSource foi movida de GlStateManager para RenderSystem
+    @Redirect(
+            method = "loadShader(Lnet/minecraft/client/gl/Shader;Ljava/lang/String;Ljava/io/InputStream;Ljava/lang/String;)V",
+            at = @At(
+                    value = "INVOKE",
+                    // O alvo da chamada agora é RenderSystem
+                    target = "Lcom/mojang/blaze3d/systems/RenderSystem;glShaderSource(ILjava/util/List;)V"
+            )
+    )
+    private void redirectGlShaderSource(int shader, @NotNull List<String> strings) {
+        if (shouldConvertShaders) {
+            for (int i = 0; i < strings.size(); i++) {
+                var originalShader = strings.get(i);
+                strings.set(i, convertShader(originalShader, i));
+            }
+        }
+        // Chama o método original (que agora é RenderSystem.glShaderSource) com a lista modificada
+        glShaderSource(shader, strings);
+    }
 }
