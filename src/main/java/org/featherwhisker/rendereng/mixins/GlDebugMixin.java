@@ -13,11 +13,11 @@ public class GlDebugMixin {
     
     /**
      * @author Featherwhisker
-     * @reason Prevents GL debug info from spamming the log.
-     * CORREÇÃO FINAL: A assinatura correta do método é info(String), sem varargs.
+     * @reason Prevents GL debug info from spamming the log by cancelling the main debug callback.
+     * CORREÇÃO DEFINITIVA: A assinatura correta é a do callback do OpenGL.
      */
-    @Inject(method="info(Ljava/lang/String;)V", at=@At("HEAD"), cancellable = true)
-    private static void shutup(String message, CallbackInfo ci) {
+    @Inject(method = "info", at = @At("HEAD"), cancellable = true)
+    private static void shutup(int source, int type, int id, int severity, int length, long message, long userParam, CallbackInfo ci) {
         if (!debugMode) {
             ci.cancel();
         }
