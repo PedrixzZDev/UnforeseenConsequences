@@ -18,8 +18,8 @@ public class WindowMixin {
     // Inject our function right before the window is created
     @Inject(method = "<init>", at = @At(value = "INVOKE", remap = false, target = "org/lwjgl/glfw/GLFW.glfwCreateWindow (IILjava/lang/CharSequence;JJ)J", shift = At.Shift.BEFORE))
     public void injected(CallbackInfo ci) {
-        // CORREÇÃO: Usando a constante VERSION_STRING para maior estabilidade
-        String frameName = "Minecraft " + SharedConstants.VERSION_STRING;
+        // CORREÇÃO FINAL: Usando SharedConstants.getGameVersion().getId() para obter a string da versão de forma confiável.
+        String frameName = "Minecraft " + SharedConstants.getGameVersion().getId();
 
         // Throw out whatever vanilla tells GLFW
         glfwDefaultWindowHints();
@@ -34,10 +34,8 @@ public class WindowMixin {
         glfwWindowHint(GLFW_SAMPLES, 0);
 
         // Misc OpenGL hints
-        // CORREÇÃO: Usando a constante correta do GLFW
         glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GLFW_TRUE);
         glfwWindowHint(GLFW_CONTEXT_CREATION_API, GLFW_NATIVE_CONTEXT_API);
-        // CORREÇÃO: Usando a constante correta do GLFW
         glfwWindowHint(GLFW_CONTEXT_NO_ERROR, GLFW_TRUE);
 
         //Platform Specific
