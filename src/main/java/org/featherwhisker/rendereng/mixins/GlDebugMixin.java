@@ -13,11 +13,11 @@ public class GlDebugMixin {
     
     /**
      * @author Featherwhisker
-     * @reason Prevents GL debug info from spamming the log by cancelling the main debug callback.
-     * CORREÇÃO DEFINITIVA: A assinatura correta é a do callback do OpenGL.
+     * @reason Prevents GL debug info from spamming the log by cancelling the wrapper method.
+     * CORREÇÃO DEFINITIVA: A assinatura correta do wrapper do Minecraft é (int, int, int, int, String).
      */
-    @Inject(method = "info", at = @At("HEAD"), cancellable = true)
-    private static void shutup(int source, int type, int id, int severity, int length, long message, long userParam, CallbackInfo ci) {
+    @Inject(method = "info(IIIILjava/lang/String;)V", at = @At("HEAD"), cancellable = true)
+    private static void shutup(int source, int type, int id, int severity, String message, CallbackInfo ci) {
         if (!debugMode) {
             ci.cancel();
         }

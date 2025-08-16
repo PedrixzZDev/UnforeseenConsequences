@@ -1,7 +1,6 @@
 package org.featherwhisker.rendereng.mixins;
 
-// CORREÇÃO DEFINITIVA: A classe é 'Shader', não 'Program'.
-import net.minecraft.client.gl.Shader;
+// A importação foi removida pois a classe é aninhada e será referenciada pelo nome completo.
 import net.minecraft.client.gl.ShaderProgram;
 import org.lwjgl.opengl.GL20;
 import org.spongepowered.asm.mixin.Mixin;
@@ -21,8 +20,9 @@ public class ShaderProgramMixin {
      * @reason Intercept shader source code before compilation to convert it from GLSL 150 to GLSL 300 ES.
      */
     @Redirect(
-            // CORREÇÃO DEFINITIVA: A assinatura do método usa Shader e Shader.Type, e retorna Shader.
-            method = "loadShader(Lnet/minecraft/client/gl/Shader$Type;Ljava/lang/String;Ljava/io/InputStream;Ljava/lang/String;)Lnet/minecraft/client/gl/Shader;",
+            // CORREÇÃO DEFINITIVA: 'Shader' é uma classe aninhada (inner class) de 'ShaderProgram'.
+            // Usamos o nome completo (Lnet/minecraft/client/gl/ShaderProgram$Shader$Type) para referenciá-la.
+            method = "load(Lnet/minecraft/client/gl/ShaderProgram$Shader$Type;Ljava/lang/String;Ljava/io/InputStream;Ljava/lang/String;)Lnet/minecraft/client/gl/ShaderProgram$Shader;",
             at = @At(
                     value = "INVOKE",
                     target = "Lorg/lwjgl/opengl/GL20;glShaderSource(ILjava/lang/String;)V"
