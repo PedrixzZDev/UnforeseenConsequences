@@ -2,7 +2,7 @@ package org.featherwhisker.rendereng.mixins;
 
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
-import net.minecraft.SharedConstants; // Importação corrigida
+import net.minecraft.SharedConstants;
 import net.minecraft.client.util.Window;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
@@ -18,8 +18,8 @@ public class WindowMixin {
     // Inject our function right before the window is created
     @Inject(method = "<init>", at = @At(value = "INVOKE", remap = false, target = "org/lwjgl/glfw/GLFW.glfwCreateWindow (IILjava/lang/CharSequence;JJ)J", shift = At.Shift.BEFORE))
     public void injected(CallbackInfo ci) {
-        // Obtenção da versão corrigida para 1.21.1+
-        String frameName = "Minecraft " + SharedConstants.getGameVersion().getName();
+        // CORREÇÃO: Usando a constante VERSION_STRING para maior estabilidade
+        String frameName = "Minecraft " + SharedConstants.VERSION_STRING;
 
         // Throw out whatever vanilla tells GLFW
         glfwDefaultWindowHints();
@@ -31,12 +31,14 @@ public class WindowMixin {
 
         // Rendering related things
         glfwWindowHint(GLFW_REFRESH_RATE, GLFW_DONT_CARE);
-        glfwWindowHint(GLFW_SAMPLES, 0); // GL_NONE is deprecated, use 0
+        glfwWindowHint(GLFW_SAMPLES, 0);
 
         // Misc OpenGL hints
-        glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
+        // CORREÇÃO: Usando a constante correta do GLFW
+        glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GLFW_TRUE);
         glfwWindowHint(GLFW_CONTEXT_CREATION_API, GLFW_NATIVE_CONTEXT_API);
-        glfwWindowHint(GLFW_CONTEXT_NO_ERROR, GL_TRUE);
+        // CORREÇÃO: Usando a constante correta do GLFW
+        glfwWindowHint(GLFW_CONTEXT_NO_ERROR, GLFW_TRUE);
 
         //Platform Specific
         try {
