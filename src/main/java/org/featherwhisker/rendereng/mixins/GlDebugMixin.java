@@ -10,9 +10,14 @@ import static org.featherwhisker.rendereng.main.debugMode;
 
 @Mixin(GlDebug.class)
 public class GlDebugMixin {
-    // CORREÇÃO: Adicionados os parâmetros do método original para resolver a ambiguidade
-    @Inject(method="info(Ljava/lang/String;[Ljava/lang/Object;)V", at=@At("HEAD"), cancellable = true)
-    private static void shutup(String message, Object[] args, CallbackInfo ci) {
+    
+    /**
+     * @author Featherwhisker
+     * @reason Prevents GL debug info from spamming the log.
+     * CORREÇÃO FINAL: A assinatura correta do método é info(String), sem varargs.
+     */
+    @Inject(method="info(Ljava/lang/String;)V", at=@At("HEAD"), cancellable = true)
+    private static void shutup(String message, CallbackInfo ci) {
         if (!debugMode) {
             ci.cancel();
         }
