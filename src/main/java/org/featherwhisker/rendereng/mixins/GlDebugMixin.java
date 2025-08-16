@@ -4,7 +4,9 @@ import net.minecraft.client.gl.GlDebug;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
-import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
+
+import java.util.Set;
 
 import static org.featherwhisker.rendereng.main.debugMode;
 
@@ -13,13 +15,18 @@ public class GlDebugMixin {
     
     /**
      * @author Featherwhisker
-     * @reason Prevents GL debug info from spamming the log by cancelling the wrapper method.
-     * CORREÇÃO DEFINITIVA: A assinatura correta do wrapper do Minecraft é (int, int, int, int, String).
+     * @reason Prevents GL debug logging from being initialized, based on the documented `enableDebug` method.
+     * SOLUÇÃO DEFINITIVA: Interceptamos o método de inicialização 'enableDebug' revelado pela documentação.
      */
-    @Inject(method = "info(IIIILjava/lang/String;)V", at = @At("HEAD"), cancellable = true)
-    private static void shutup(int source, int type, int id, int severity, String message, CallbackInfo ci) {
+    @Inject(
+            method = "enableDebug(IZLjava/util/Set;)Lnet/minecraft/client/gl/GlDebug;",
+            at = @At("HEAD"),
+            cancellable = true
+    )
+    private static void cancelDebugInitialization(int verbosity, boolean sync, Set<String> usedGlCaps, CallbackInfoReturnable<GlDebug> cir) {
+        // Se o modo debug NÃO estiver ativo, impedimos a inicialização retornando null.
         if (!debugMode) {
-            ci.cancel();
+            cir.setReturnValue(null);
         }
     }
 }
