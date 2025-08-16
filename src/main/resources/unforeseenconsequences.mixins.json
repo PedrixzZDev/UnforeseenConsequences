@@ -7,7 +7,7 @@
     "GlDebugMixin",
     "GlStateManagerMixin",
     "RenderSystemMixin",
-    "ShaderStageMixin",
+    "ShaderProgramMixin",
     "WindowMixin"
   ],
   "injectors": {
