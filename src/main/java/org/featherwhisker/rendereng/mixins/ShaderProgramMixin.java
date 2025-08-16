@@ -1,10 +1,13 @@
 package org.featherwhisker.rendereng.mixins;
 
+import net.minecraft.client.gl.Shader;
 import net.minecraft.client.gl.ShaderProgram;
-import org.lwjgl.opengl.GL20; // CORREÇÃO: Importação necessária
+import org.lwjgl.opengl.GL20;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Redirect;
+
+import java.io.InputStream;
 
 import static org.featherwhisker.rendereng.main.convertShader;
 import static org.featherwhisker.rendereng.main.shouldConvertShaders;
@@ -15,20 +18,19 @@ public class ShaderProgramMixin {
     /**
      * @author Featherwhisker
      * @reason Intercept shader source code before compilation to convert it from GLSL 150 to GLSL 300 ES.
-     *         The target is the direct LWJGL call, as RenderSystem no longer wraps glShaderSource.
      */
     @Redirect(
-            method = "loadShader(Lnet/minecraft/client/gl/Shader$Type;Ljava/lang/String;Ljava/io/InputStream;)Lnet/minecraft/client/gl/Shader;",
+            // CORREÇÃO: A assinatura do método agora inclui o parâmetro 'domain'
+            method = "loadShader(Lnet/minecraft/client/gl/Shader$Type;Ljava/lang/String;Ljava/io/InputStream;Ljava/lang/String;)Lnet/minecraft/client/gl/Shader;",
             at = @At(
                     value = "INVOKE",
-                    // CORREÇÃO: O alvo agora é a chamada de baixo nível do LWJGL
-                    target = "Lorg/lwjgl/opengl/GL20;glShaderSource(ILjava/lang/CharSequence;)V"
+                    // CORREÇÃO: O descritor agora usa 'String' em vez de 'CharSequence'
+                    target = "Lorg/lwjgl/opengl/GL20;glShaderSource(ILjava/lang/String;)V"
             )
     )
-    private static void redirectGlShaderSource(int shader, CharSequence source) {
+    private static void redirectGlShaderSource(int shader, String source) {
         if (shouldConvertShaders) {
-            String convertedSource = convertShader(source.toString());
-            // CORREÇÃO: Chamando o método original que estávamos redirecionando
+            String convertedSource = convertShader(source);
             GL20.glShaderSource(shader, convertedSource);
         } else {
             GL20.glShaderSource(shader, source);

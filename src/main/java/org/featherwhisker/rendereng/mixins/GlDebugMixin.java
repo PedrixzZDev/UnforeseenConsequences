@@ -10,8 +10,9 @@ import static org.featherwhisker.rendereng.main.debugMode;
 
 @Mixin(GlDebug.class)
 public class GlDebugMixin {
-    @Inject(method="info",at=@At("HEAD"),cancellable = true)
-    private static void shutup(CallbackInfo ci) {
+    // CORREÇÃO: Adicionados os parâmetros do método original para resolver a ambiguidade
+    @Inject(method="info(Ljava/lang/String;[Ljava/lang/Object;)V", at=@At("HEAD"), cancellable = true)
+    private static void shutup(String message, Object[] args, CallbackInfo ci) {
         if (!debugMode) {
             ci.cancel();
         }

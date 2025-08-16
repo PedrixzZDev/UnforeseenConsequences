@@ -6,9 +6,6 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
-import static org.lwjgl.opengl.GL11.GL_TEXTURE_2D;
-import static org.lwjgl.opengl.GL14.GL_TEXTURE_LOD_BIAS; // CORREÇÃO FINAL: Importado de GL14, como era originalmente.
-
 @Mixin(RenderSystem.class)
 public class RenderSystemMixin {
 
@@ -39,14 +36,5 @@ public class RenderSystemMixin {
         ci.cancel();
     }
 
-    /**
-     * @author Featherwhisker
-     * @reason GL_TEXTURE_LOD_BIAS is deprecated and causes errors on some GLES drivers.
-     */
-    @Inject(method = "texParameter(IIF)V", at = @At("HEAD"), cancellable = true, remap = false)
-    private static void texParameterFloatInject(int target, int pname, float param, CallbackInfo ci) {
-        if (target == GL_TEXTURE_2D && pname == GL_TEXTURE_LOD_BIAS) {
-            ci.cancel();
-        }
-    }
+    // O método texParameter(IIF) foi removido pois não existe mais no RenderSystem do Minecraft 1.21.1
 }
