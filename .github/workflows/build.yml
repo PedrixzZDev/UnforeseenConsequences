@@ -1,17 +1,12 @@
-# Nome do workflow, exibido na aba "Actions" do GitHub
 name: Build and Artifact
 
-# Aciona o workflow em qualquer push para o repositório
 on: [push]
 
 jobs:
   build:
-    # Executa o job no runner mais recente do Ubuntu fornecido pelo GitHub
     runs-on: ubuntu-latest
 
     steps:
-      # Etapa 1: Extrai o nome da branch atual para usar no nome do artefato.
-      # Isso remove "refs/heads/" e substitui barras (/) por hífens (-) para compatibilidade.
       - name: Extract current branch name
         shell: bash
         run: |
@@ -19,39 +14,30 @@ jobs:
           echo "branch=${ref////-}" >> $GITHUB_OUTPUT
         id: ref
 
-      # Etapa 2: Clona o código-fonte do repositório para o runner.
       - name: Checkout sources
         uses: actions/checkout@v4
 
-      # Etapa 3: Configura o ambiente Java (JDK).
-      # O mod requer Java 17, conforme definido no build.gradle.
       - name: Setup Java 21
         uses: actions/setup-java@v4
         with:
-          distribution: 'temurin' # Uma distribuição popular e confiável do OpenJDK
+          distribution: 'temurin'
           java-version: '21'
 
-      # Etapa 4: Garante que o Gradle Wrapper é executável (boa prática em ambientes CI).
       - name: Make gradlew executable
         run: chmod +x ./gradlew
 
-      # Etapa 5: Configura o Gradle, incluindo o cache de dependências para acelerar builds futuros.
       - name: Setup Gradle
         uses: gradle/actions/setup-gradle@v4
         with:
-          # Permite que o cache seja escrito, não apenas lido.
           cache-read-only: false
 
-      # Etapa 6: Executa o comando de build do Gradle.
-      # Isso compila o código, processa os recursos e cria o arquivo .jar.
+      # CORREÇÃO APLICADA AQUI
       - name: Execute Gradle build
-        run: ./gradlew build
+        # Adicionado "clean" para garantir que nenhum artefato ou cache antigo cause conflitos
+        run: ./gradlew clean build
 
-      # Etapa 7: Faz o upload do(s) arquivo(s) .jar compilado(s) como um artefato do workflow.
       - name: Upload artifacts
         uses: actions/upload-artifact@v4
         with:
-          # O nome do artefato incluirá o nome da branch para fácil identificação.
           name: unforeseen-consequences-artifacts-${{ steps.ref.outputs.branch }}
-          # O Fabric Loom coloca os JARs finais no diretório 'build/libs/'.
           path: build/libs/*.jar
