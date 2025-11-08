@@ -26,14 +26,18 @@ jobs:
       - name: Make gradlew executable
         run: chmod +x ./gradlew
 
-      - name: Setup Gradle
+      # CORREÇÃO: Alterada a chave do cache para incluir um timestamp.
+      # Isso força o Gradle a baixar as dependências corretas (como a nova versão do Loom)
+      # em vez de usar uma versão antiga do cache.
+      - name: Setup Gradle and Clear Cache
         uses: gradle/actions/setup-gradle@v4
         with:
           cache-read-only: false
+          # A chave do cache agora depende do hash do commit, garantindo que seja único
+          cache-key: gradle-cache-${{ github.sha }}
 
-      # CORREÇÃO APLICADA AQUI
       - name: Execute Gradle build
-        # Adicionado "clean" para garantir que nenhum artefato ou cache antigo cause conflitos
+        # O comando 'clean' continua sendo uma boa prática
         run: ./gradlew clean build
 
       - name: Upload artifacts
