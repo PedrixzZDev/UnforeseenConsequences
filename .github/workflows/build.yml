@@ -25,11 +25,11 @@ jobs:
 
       # Etapa 3: Configura o ambiente Java (JDK).
       # O mod requer Java 17, conforme definido no build.gradle.
-      - name: Setup Java 17
+      - name: Setup Java 21
         uses: actions/setup-java@v4
         with:
           distribution: 'temurin' # Uma distribuição popular e confiável do OpenJDK
-          java-version: '17'
+          java-version: '21'
 
       # Etapa 4: Garante que o Gradle Wrapper é executável (boa prática em ambientes CI).
       - name: Make gradlew executable
