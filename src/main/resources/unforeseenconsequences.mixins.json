@@ -4,9 +4,9 @@
   "package": "org.featherwhisker.rendereng.mixins",
   "compatibilityLevel": "JAVA_17",
   "client": [
+    "CompiledShaderMixin",
     "GlDebugMixin",
     "RenderSystemMixin",
-    "ShaderMixin",
     "WindowMixin"
   ],
   "injectors": {
