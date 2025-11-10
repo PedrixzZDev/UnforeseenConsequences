@@ -1,6 +1,6 @@
 package org.featherwhisker.rendereng.mixins;
 
-import net.minecraft.MinecraftVersion;
+import net.minecraft.SharedConstants; // Importa a classe correta
 import net.minecraft.client.util.Window;
 import org.featherwhisker.rendereng.main;
 import org.spongepowered.asm.mixin.Mixin;
@@ -16,8 +16,9 @@ public class WindowMixin {
 
     @Inject(method = "<init>", at = @At(value = "INVOKE", remap = false, target = "Lorg/lwjgl/glfw/GLFW;glfwCreateWindow(IILjava/lang/CharSequence;JJ)J", shift = At.Shift.BEFORE))
     private void setGlfwWindowHints(CallbackInfo ci) {
-        // CORREÇÃO: Revertendo para getName(), que é o método correto.
-        String frameName = "Minecraft " + MinecraftVersion.create().getName();
+        // CORREÇÃO FINAL: Usando SharedConstants.getGameVersion() para obter a
+        // versão do jogo. Este é o método canônico e mais estável em versões recentes.
+        String frameName = "Minecraft " + SharedConstants.getGameVersion().getName();
 
         main.log.info("Applying OpenGL ES 3.0 context hints...");
 
