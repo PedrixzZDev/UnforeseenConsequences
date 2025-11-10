@@ -5,8 +5,8 @@
   "compatibilityLevel": "JAVA_17",
   "client": [
     "GlDebugMixin",
-    "ProgramMixin",
     "RenderSystemMixin",
+    "ShaderMixin",
     "WindowMixin"
   ],
   "injectors": {
