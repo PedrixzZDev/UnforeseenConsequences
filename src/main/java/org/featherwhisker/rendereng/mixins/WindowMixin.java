@@ -2,8 +2,7 @@ package org.featherwhisker.rendereng.mixins;
 
 import net.minecraft.MinecraftVersion;
 import net.minecraft.client.util.Window;
-import org.featherwhisker.rendereng.ClientMain;
-import org.lwjgl.glfw.GLFW;
+import org.featherwhisker.rendereng.main;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
@@ -17,10 +16,10 @@ public class WindowMixin {
 
     @Inject(method = "<init>", at = @At(value = "INVOKE", remap = false, target = "Lorg/lwjgl/glfw/GLFW;glfwCreateWindow(IILjava/lang/CharSequence;JJ)J", shift = At.Shift.BEFORE))
     private void setGlfwWindowHints(CallbackInfo ci) {
-        // CORREÇÃO: Usando getId() em vez do obsoleto getName()
-        String frameName = "Minecraft " + MinecraftVersion.create().getId();
+        // CORREÇÃO: Usando getReleaseTarget() para a versão 25w45a
+        String frameName = "Minecraft " + MinecraftVersion.create().getReleaseTarget();
 
-        ClientMain.log.info("Applying OpenGL ES 3.0 context hints...");
+        main.log.info("Applying OpenGL ES 3.0 context hints...");
 
         glfwDefaultWindowHints();
         glfwWindowHint(GLFW_CLIENT_API, GLFW_OPENGL_ES_API);
@@ -31,6 +30,6 @@ public class WindowMixin {
         glfwWindowHint(GLFW_CONTEXT_CREATION_API, GLFW_NATIVE_CONTEXT_API);
         glfwWindowHint(GLFW_CONTEXT_NO_ERROR, GL_TRUE);
 
-        ClientMain.log.info("OpenGL ES hints applied for window: {}", frameName);
+        main.log.info("OpenGL ES hints applied for window: {}", frameName);
     }
 }
